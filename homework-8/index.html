@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    td, th {
+        border: 1px solid black;
+        padding: 5px;
+    }
+    
+    table {
+        border-collapse: collapse;
+    }
+    body > * {
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <button id="fetch-quote">Fetch Quote</button>
+    <div id="quote"></div>
+
+
+<form action="" id="car-form">
+    <input type="number" name="carId" id="carId">
+    <button type="submit" id="fetch-car">Fetch Car</button>
+</form>
+
+<div id="car-info">
+</div>
+
+
+<div id="pagination"></div>
+
+<table style="border: 1px solid black;">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Age</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody id="users"></tbody>
+</table>
+</body>
+
+<script src="./index.js"></script>
+</html>
