@@ -8,8 +8,9 @@ export async function returnParsedData(dirName) {
 }
 
 export function validatePrice(price) {
-    if (Number(price) < 10) {
-        console.log(chalk.yellow('Price should be at least 10'));
+
+    if (isNaN(Number(price)) || Number(price) < 10) {
+        console.log(chalk.yellow('Price should be a number and at least 10'));
         return false;
     }
     return true;

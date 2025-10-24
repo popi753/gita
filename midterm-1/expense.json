@@ -24,30 +24,6 @@
         "createdAt": "2025-10-24T11:28:10.486Z"
     },
     {
-        "id": 817,
-        "category": "groceries",
-        "price": 85.5,
-        "createdAt": "2024-01-24T09:15:00.000Z"
-    },
-    {
-        "id": 604,
-        "category": "utilities",
-        "price": 120.75,
-        "createdAt": "2024-01-23T14:30:00.000Z"
-    },
-    {
-        "id": 758,
-        "category": "entertainment",
-        "price": 45.99,
-        "createdAt": "2024-01-22T18:45:00.000Z"
-    },
-    {
-        "id": 935,
-        "category": "shopping",
-        "price": 199.99,
-        "createdAt": "2024-01-21T11:20:00.000Z"
-    },
-    {
         "id": 246,
         "category": "transportation",
         "price": 32.5,
