@@ -1,0 +1,92 @@
+[
+    {
+        "id": 817,
+        "category": "bill",
+        "price": 100,
+        "createdAt": "2025-10-24T11:23:07.882Z"
+    },
+    {
+        "id": 604,
+        "category": "down",
+        "price": 20,
+        "createdAt": "2025-10-24T11:23:26.403Z"
+    },
+    {
+        "id": 758,
+        "category": "home",
+        "price": 10,
+        "createdAt": "2025-10-24T11:27:56.048Z"
+    },
+    {
+        "id": 935,
+        "category": "shopping",
+        "price": 50,
+        "createdAt": "2025-10-24T11:28:10.486Z"
+    },
+    {
+        "id": 246,
+        "category": "transportation",
+        "price": 32.5,
+        "createdAt": "2024-01-20T08:00:00.000Z"
+    },
+    {
+        "id": 573,
+        "category": "groceries",
+        "price": 67.25,
+        "createdAt": "2024-01-19T16:10:00.000Z"
+    },
+    {
+        "id": 391,
+        "category": "healthcare",
+        "price": 150,
+        "createdAt": "2024-01-18T13:45:00.000Z"
+    },
+    {
+        "id": 824,
+        "category": "shopping",
+        "price": 89.99,
+        "createdAt": "2024-01-17T15:30:00.000Z"
+    },
+    {
+        "id": 798,
+        "category": "healthcare",
+        "price": 17,
+        "createdAt": "2025-10-24T12:20:59.829Z"
+    },
+    {
+        "id": 3212,
+        "category": "movie",
+        "price": 10,
+        "createdAt": "2025-10-24T12:26:15.223Z"
+    },
+    {
+        "id": 12,
+        "category": "bill",
+        "price": 1550,
+        "createdAt": "2025-10-24T12:26:15.223Z"
+    },
+    {
+        "id": 3102,
+        "category": "clothes",
+        "price": 120,
+        "createdAt": "2025-10-24T12:26:15.223Z"
+    },
+    {
+        "id": 882,
+        "category": "car",
+        "price": 11230,
+        "createdAt": "2025-10-24T12:26:15.223Z"
+    },
+    {
+        "id": 999,
+        "category": "car",
+        "price": 11230,
+        "createdAt": "2025-10-24T12:26:15.223Z"
+    },
+    {
+        "id": 71,
+        "category": "known",
+        "price": 10,
+        "createdAt": "2025-10-30T14:05:27.628Z"
+    }
+]

@@ -2,14 +2,14 @@
   "name": "homework-13",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "bin": {
     "todo-cli": "todo.js",
     "weather-cli": "weather.js",
     "expense-cli": "expense.js"
-
   },
   "scripts": {
+    "start" : "node --watch homework-14/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,6 +18,7 @@
   "description": "",
   "dependencies": {
     "chalk": "^5.6.2",
-    "commander": "^14.0.1"
+    "commander": "^14.0.1",
+    "express": "^5.1.0"
   }
 }
