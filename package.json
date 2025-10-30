@@ -9,7 +9,7 @@
     "expense-cli": "expense.js"
   },
   "scripts": {
-    "start" : "node --watch homework-14/index.js",
+    "start" : "node --watch homework-14-15/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
