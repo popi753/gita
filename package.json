@@ -9,7 +9,7 @@
     "expense-cli": "expense.js"
   },
   "scripts": {
-    "start" : "node --watch homework-14-15/index.js",
+    "start": "node --watch homework-14-15-16/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,6 +19,8 @@
   "dependencies": {
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
-    "express": "^5.1.0"
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.3"
   }
 }
