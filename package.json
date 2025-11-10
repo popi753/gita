@@ -9,7 +9,8 @@
     "expense-cli": "expense.js"
   },
   "scripts": {
-    "start": "node --watch homework-14-15-16/index.js",
+    "start homework-16": "node --watch homework-14-15-16/index.js",
+    "start": "node --watch homework-17/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,10 +18,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongoose": "^8.19.3"
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.3",
+    "nodemon": "^3.1.10"
   }
 }
