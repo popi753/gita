@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/index.css">
+    <title>Expense page</title>
+</head>
+<body>
+     <%- include("../partials/headers.ejs")  %>
+    <main class="main">
+            <% if (!expense) { %>
+                <h2>something went wrong, try later</h2>
+            <% } else { %>
+             
+            <div class="expense-card">
+                <% if (expense) { %>
+                    <a href="<%=expense.id %>/edit"><button>edit expense</button></a>
+                    <a href="<%=expense.id %>/delete"><button>delete expense</button></a>
+                    
+                        <h2><%= expense.category %></h2>
+                        <h4><%= expense.price %>$</h4>
+                        <% } else { %>
+                            <h3>couldnt find the expense</h3>
+                            <%}  %>                         
+            </div>
+            <% } %>
+     </main>
+     <%- include("../partials/footer") %>
+
+</body>
+</html>

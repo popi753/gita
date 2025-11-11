@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/index.css">
+    <title>Create expense</title>
+</head>
+<body>
+     <%- include("../partials/headers.ejs")  %>
+    <main class="main">
+        <h3>create expense</h3>
+        <div>
+            <form class="create-form" method="post" action="#">
+                <label for="category">category</label>
+                <input type="text" name="category"   placeholder="Enter category" required >
+                <label for="price">price</label>
+                <input type="number" name="price"  placeholder="Enter price"  required>
+
+                <button>submit</button>
+            </form>
+            
+            <div>
+                <% if (error) { %>
+                    
+                    <% if (error.price) { %>
+                    <h1><%= error.price %> </h1>
+                    <% } %>
+                    <% if (error.category) { %>
+                        <h1><%= error.category %> </h1>
+                    <% } %>
+                    <% if (error.body) { %>
+                        <h1><%= error.body %> </h1>
+                    <% } %>
+                    
+                <% } %>
+                
+            </div>
+        </div>
+     </main>
+     <%- include("../partials/footer") %>
+
+</body>
+</html>

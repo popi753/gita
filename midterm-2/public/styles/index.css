@@ -1,0 +1,94 @@
+body{
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    justify-content: space-between;
+} 
+
+header {
+    box-sizing: border-box;
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+    background-color: grey;
+}
+
+header ul {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+header ul li {
+    text-decoration: none;
+}
+
+footer{
+    display: flex;
+    width: 100%;
+    height: 30px;
+    background-color: grey;
+    float: inline-end;
+
+    align-self: flex-end;
+}
+
+main{
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+
+
+a{
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+button{
+    cursor: pointer;
+}
+
+.search-form{
+    display: flex;
+    flex-flow: row;
+    gap: 20px;
+
+    
+}
+
+.expense-container{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.expense-card{
+    border: 1px solid black;
+    width: fit-content;
+
+    padding: 0px 20px;
+
+    transition: all 0.3s ease-in;
+}
+
+
+.expense-card:hover{
+    background-color: black;
+    color: white;
+
+
+}

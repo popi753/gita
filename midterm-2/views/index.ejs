@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/index.css">
+    <title>Home page</title>
+</head>
+<body>
+     <%- include("partials/headers.ejs")  %>
+     <main class="main">
+            <form class="search-form" method="get" action="/">
+                <search>
+                    <label for="search">search by category</label>
+                    <input id="search" type="search" name="search">
+                </search>
+                <button>search</button>
+            </form>
+            <div class="expense-container">
+                <% if (!data) {
+                    null
+                }else if (data.length === 0) {%>
+                    there is no expense with this cateogry
+                <% } else if (data.length) { 
+                        data.forEach(e=>{%>
+                    <a href="expenses/<%=e.id %>" class="expense-card">
+                        <h2><%= e.category %></h2>
+                        <h4><%= e.price %>$</h4>
+                        
+                        </a>
+                    <%  }) %>
+                <%}%> 
+            </div>
+     </main>
+     <%- include("partials/footer") %>
+
+</body>
+</html>
