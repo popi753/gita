@@ -1,8 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
-import { UserService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { QueryParamsDto } from "./dto/queryParams.dto";
+import { Transform } from "class-transformer";
+import { IsNumber, IsOptional, IsString, Min, IsEnum } from "class-validator";
+import { Gender } from "./create-user.dto";
 
 // 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
 //  გამოიყენეთ DTO და class-validator, class-transformer
@@ -14,32 +12,24 @@ import { QueryParamsDto } from "./dto/queryParams.dto";
 // უნდა დააბრუნოს ყველა მმარრობითი სქესის იუზერი და დამატებით ყველა ის იუზერი რომლის იმეილიც იწყება test ით.
 
 
-@Controller("/users")
-export class UsersController{
-    constructor(private readonly userService: UserService) {}
+export class QueryParamsDto {
+    @IsOptional()
+    @IsNumber()
+    @Transform(({value})=>Number(value))
+    @Min(1)
+    page:number = 1
 
-    @Get()
-    getAllUsers(@Query() query:QueryParamsDto){
-        return this.userService.getAllUsers(query);
-    }
+    @IsOptional()
+    @IsNumber()
+    @Transform(({value})=>Math.min(30, Number(value)))
+    @Min(1)
+    take:number = 30
 
-    @Post()
-    createUser(@Body() createUserDto:CreateUserDto){
-        return this.userService.createUser(createUserDto);
-    }
+    @IsOptional()
+    @IsEnum(Gender)
+    gender:Gender
 
-    @Get("/:id")
-    getUserById(@Param("id", ParseIntPipe) id:number){
-        return this.userService.getUserById(id);
-    }
-
-    @Delete("/:id")
-    deleteUserById(@Param("id", ParseIntPipe) id:string){
-        return this.userService.deleteUserById(Number(id));
-    }
-
-    @Patch("/:id")
-    updateUserById(@Param("id", ParseIntPipe) id:string, @Body() updateUserDto:UpdateUserDto){
-        return this.userService.updateUserById(Number(id), updateUserDto);
-    }
+    @IsOptional()
+    @IsString()
+    emailStartsWith:string
 }

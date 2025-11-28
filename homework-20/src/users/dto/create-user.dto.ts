@@ -1,3 +1,5 @@
+import { Transform } from "class-transformer"
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator"
 
 export enum Gender {
     Male = "male",
@@ -5,9 +7,24 @@ export enum Gender {
 }
 
 export class CreateUserDto {
+    @IsNotEmpty()
+    @IsString()
     firstName:string
+
+    @IsNotEmpty()
+    @IsString()
     lastName:string
+
+    @IsNotEmpty()
+    @IsEmail()
     email:string
-    phoneNumber:number
+
+    @IsNotEmpty()
+    @IsString()
+    @Transform(({value}) => String(value))
+    phoneNumber:string
+
+    @IsNotEmpty()
+    @IsEnum(Gender)
     gender: Gender
 }
