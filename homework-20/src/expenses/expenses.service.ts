@@ -87,11 +87,13 @@ export class ExpenseService {
         
                 let filteredExpenses = this.expenses;
 
+
                 if (category) {
                     filteredExpenses = filteredExpenses.filter(e=>{
                         return (e.category === category)
                     })
                 }
+
 
                 if (priceFrom || priceTo) {
                     filteredExpenses = filteredExpenses.filter(e=>{
@@ -107,7 +109,9 @@ export class ExpenseService {
                 }
 
 
-                const paginatedExpenses = filteredExpenses.slice(start, end);
+
+                let paginatedExpenses = filteredExpenses.slice(start, end);
+
 
                 return {
                     page,
@@ -154,6 +158,8 @@ export class ExpenseService {
         if (!expense) {
             throw new NotFoundException("expense not found");
         }
+
+        
         return expense;
     }
 
