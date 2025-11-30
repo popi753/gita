@@ -4,19 +4,20 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { QueryParamsDto } from "./dto/queryParams.dto";
 
-// 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
-//  გამოიყენეთ DTO და class-validator, class-transformer
+// 2) იუზერების შექმნის დროს გადააკეთებთ ლოგიკას რო ყოველი ახალი იუზერის დამატებისას სისტემამ ავტომატურად მიანიჭოს subscriptionStartDate  და subscriptionEndDate, 1 თვე უნდა იყოს ყოველთვის საბსქრიფშენის ვადა.
 
-// 2) დაამატეთ ორივე რესურსზე ფეჯინეიშენი, page = 1, take.= 30,
-//  არაფერს თუ არ გადასცემთ დიფოლატად პირველი 30 ჩანაწერი უნდა წამოიღოს
-
-// 4) იუზერების გეთის დროს გაჰენდლეთ ფილტრები მაგალითად /users?gender=m უნდა დააბრუნოს ყველა მმამრობითი სქესის იუზერი, /users?gender=m&email=test
-// უნდა დააბრუნოს ყველა მმარრობითი სქესის იუზერი და დამატებით ყველა ის იუზერი რომლის იმეილიც იწყება test ით.
+// 4) იუზერების კონტროლერს დაამატეთ ახალი ენდფოინთი /upgrade-subscription და აქ თუ დაარექუსთებს იუზერი შეამოწმეთ რამდენად ვალიდური იუზერია და თუ ყველაფერი რიგზეა საბსქრიფშენის subscriptionEndDate გაუხანგრძლივეთ კიდევ ერთი თვით.
 
 
 @Controller("/users")
 export class UsersController{
     constructor(private readonly userService: UserService) {}
+
+    @Patch("/upgrade-subscription")
+    upgradeSubscription(@Body("userId", ParseIntPipe) userId: number) {
+        console.log(userId)
+        return this.userService.upgradeSubscription(userId);
+    }
 
     @Get()
     getAllUsers(@Query() query:QueryParamsDto){

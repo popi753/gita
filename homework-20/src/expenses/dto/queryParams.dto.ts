@@ -20,7 +20,7 @@ export class QueryParamsDto {
     @IsNumber()
     @Transform(({value})=>Math.min(30, Number(value)))
     @Min(1)
-    take:number
+    take:number = 30
 
     @IsOptional()
     @IsNumber()
