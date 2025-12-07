@@ -1,10 +1,8 @@
 import { Transform } from "class-transformer"
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator"
+import { Gender } from "../schemas/user.schema"
 
-export enum Gender {
-    Male = "male",
-    Female = "female",
-}
+
 
 export class CreateUserDto {
     @IsNotEmpty()
@@ -28,3 +26,5 @@ export class CreateUserDto {
     @IsEnum(Gender)
     gender: Gender
 }
+export { Gender }
+

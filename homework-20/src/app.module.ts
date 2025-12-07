@@ -4,21 +4,24 @@ import { AppService } from './app.service';
 import { UserModule } from './users/users.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { ProductsModule } from './products/products.module';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
-// თქვენი დავალებაა წინა 21 დავალებას დაუმატოთ ერთი ახალი რესურსი
-// nest g res products
+// თქვენი დავალებაა წინა დავალებებს ანუ  20, 21, 22 დაუმატოთ მონგოდბ ის იმპლემენტაცია
 
-// 1) ყველა პროდუქტს უნდა ჰპონდეს ფასი, სახელი, კატეგორია, აღწერა, რაოდენობა, ვალიდაციისთვის გამოიყენეთ class-validator class-transformer
+// 1) იუზერებზე, იქსფენსებზე, პროდუქტებზე
 
-// 2) იუზერების შექმნის დროს გადააკეთებთ ლოგიკას რო ყოველი ახალი იუზერის დამატებისას სისტემამ ავტომატურად მიანიჭოს subscriptionStartDate  და subscriptionEndDate, 1 თვე უნდა იყოს ყოველთვის საბსქრიფშენის ვადა.
+// 2) თქვენით განსაზღვფრეთ რომელ კოლექციებს შორის იქნება რელაცია მაგალთად, იუზერებსად და იქსფენსებს შორის.
 
-// 3) ყველა პროდუქტის გამოძახებისას დაადეთ გარდი და შეამოწმეთ თუ მოყვება იმეილი და ამ იმეილით ნაპოვნ იუზერს აქვს აქტიური საბსქრიფშენი დააბრუნოს ფასდაკებული პროდუქტები თუ არადა და დააბრუნოს ჩვეულებრივი პროდუქტები.
-// * გაითვალისწინეთ თუ იმეილი არ გადაეცი ჰედერში პროდუქტების წამოღების დროს ერორი არ უნდა დაარტყას და ყველა პროდუქტი უნდა დააბრუნოს.
-
-// 4) იუზერების კონტროლერს დაამატეთ ახალი ენდფოინთი /upgrade-subscription და აქ თუ დაარექუსთებს იუზერი შეამოწმეთ რამდენად ვალიდური იუზერია და თუ ყველაფერი რიგზეა საბსქრიფშენის subscriptionEndDate გაუხანგრძლივეთ კიდევ ერთი თვით.
+// 3) შეეცადეთ ქრადის დროს ყველაფერი გააკეთოთ სწორად, და არ გამოგრჩეთ წაშლა ან განახლება ან რაიმე სხვა, ასევე ვალიდაციები.
 
 @Module({
-  imports: [UserModule,ExpensesModule, ProductsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(process.env.DB_URL!),
+    UserModule, ExpensesModule, ProductsModule],
   controllers: [AppController],
   providers: [AppService],
 })

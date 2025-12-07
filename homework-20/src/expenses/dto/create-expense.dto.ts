@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer"
-import { IsIn, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsIn, IsMongoId, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
 
 export class CreateExpenseDto {
@@ -22,4 +22,7 @@ export class CreateExpenseDto {
     @Transform(({value})=>Number(value))
     price:number
 
+    @IsNotEmpty()
+    @IsMongoId()
+    user:string
 }

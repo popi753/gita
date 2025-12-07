@@ -3,6 +3,7 @@ import { UserService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { QueryParamsDto } from "./dto/queryParams.dto";
+import { isValidObjectid } from "../common/is-valid-objectId.dto";
 
 // 2) იუზერების შექმნის დროს გადააკეთებთ ლოგიკას რო ყოველი ახალი იუზერის დამატებისას სისტემამ ავტომატურად მიანიჭოს subscriptionStartDate  და subscriptionEndDate, 1 თვე უნდა იყოს ყოველთვის საბსქრიფშენის ვადა.
 
@@ -14,14 +15,14 @@ export class UsersController{
     constructor(private readonly userService: UserService) {}
 
     @Patch("/upgrade-subscription")
-    upgradeSubscription(@Body("userId", ParseIntPipe) userId: number) {
-        console.log(userId)
-        return this.userService.upgradeSubscription(userId);
+    upgradeSubscription(@Body() {id}: isValidObjectid) {
+        console.log(id)
+        return this.userService.upgradeSubscription(id);
     }
 
     @Get()
-    getAllUsers(@Query() query:QueryParamsDto){
-        return this.userService.getAllUsers(query);
+    findAll(@Query() query:QueryParamsDto){
+        return this.userService.findAll(query);
     }
 
     @Post()
@@ -30,17 +31,24 @@ export class UsersController{
     }
 
     @Get("/:id")
-    getUserById(@Param("id", ParseIntPipe) id:number){
-        return this.userService.getUserById(id);
+    findOne(@Param() {id} : isValidObjectid){
+        return this.userService.findOne(id);
     }
 
     @Delete("/:id")
-    deleteUserById(@Param("id", ParseIntPipe) id:string){
-        return this.userService.deleteUserById(Number(id));
+    deleteUserById(@Param() {id}:isValidObjectid){
+        return this.userService.deleteUserById(id);
     }
 
     @Patch("/:id")
-    updateUserById(@Param("id", ParseIntPipe) id:string, @Body() updateUserDto:UpdateUserDto){
-        return this.userService.updateUserById(Number(id), updateUserDto);
+    updateUserById(@Param() {id}:isValidObjectid, @Body() updateUserDto:UpdateUserDto){
+        return this.userService.updateUserById(id, updateUserDto);
     }
+
+    // insert many users at once
+    // use once dont repeat
+    // @Post("/insertMany")
+    // insertMany(){
+    //     return this.userService.insertDataToMongoDB();
+    // }
 }

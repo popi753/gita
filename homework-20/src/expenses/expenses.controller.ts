@@ -5,6 +5,7 @@ import { UpdateExpenseDto } from "./dto/update-expense.dto";
 // import { CreateExpensePipe } from "./pipes/create-expense.pipe";
 // import { ExpenseQueryPipe } from "./pipes/expense-query.pipe";
 import { QueryParamsDto } from "./dto/queryParams.dto";
+import { isValidObjectid } from "../common/is-valid-objectId.dto";
 
 // 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
 //  გამოიყენეთ DTO და class-validator, class-transformer
@@ -17,13 +18,14 @@ export class ExpenseController{
     constructor(private readonly expenseService: ExpenseService) {}
 
     @Get()
-    getAllExpenses(@Query() query:QueryParamsDto){
-    // getAllExpenses(@Query(new ExpenseQueryPipe()) query){
-            return this.expenseService.getAllExpenses(query);
+    findAll(@Query() query:QueryParamsDto){
+    // findAll(@Query(new ExpenseQueryPipe()) query){
+            return this.expenseService.findAll(query);
     }
 
     @Post()
     createExpense(@Body() createExpenseDto: CreateExpenseDto){
+
         return this.expenseService.createExpense(createExpenseDto);
     }
     // createExpense(@Body(new CreateExpensePipe()) createExpenseDto:CreateExpenseDto){
@@ -34,17 +36,25 @@ export class ExpenseController{
     // }
 
     @Get("/:id")
-    getExpenseById(@Param("id", ParseIntPipe) id:number){
+    getExpenseById(@Param() {id}:isValidObjectid){
         return this.expenseService.getExpenseById(id);
     }
 
     @Delete("/:id")
-    deleteExpenseById(@Param("id", ParseIntPipe) id:string){
-        return this.expenseService.deleteExpenseById(Number(id));
+    deleteExpenseById(@Param() {id}:isValidObjectid){
+        return this.expenseService.deleteExpenseById(id);
     }
 
     @Patch("/:id")
-    updateExpenseById(@Param("id", ParseIntPipe) id:string, @Body() updateExpenseDto:UpdateExpenseDto){
-        return this.expenseService.updateExpenseById(Number(id), updateExpenseDto);
+    updateExpenseById(@Param() {id}:isValidObjectid, @Body() updateExpenseDto:UpdateExpenseDto){
+        return this.expenseService.updateExpenseById(id, updateExpenseDto);
     }
+
+    // insert many users at once
+    // use once dont repeat
+    //use users/insertmany first
+    // @Post("/insertMany")
+    // insertMany(){
+    //     return this.expenseService.insertDataToMongoDB();
+    // }
 }
