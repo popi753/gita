@@ -22,7 +22,4 @@ export class CreateExpenseDto {
     @Transform(({value})=>Number(value))
     price:number
 
-    @IsNotEmpty()
-    @IsMongoId()
-    user:string
 }

@@ -30,6 +30,13 @@ export class user {
     @Prop({
         required: true,
         type: String,
+        select: false,
+    })
+    password:string
+
+    @Prop({
+        required: true,
+        type: String,
         unique: true,
     })
     phoneNumber:string

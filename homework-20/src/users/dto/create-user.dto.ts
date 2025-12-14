@@ -19,6 +19,10 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsString()
+    password:string
+
+    @IsNotEmpty()
+    @IsString()
     @Transform(({value}) => String(value))
     phoneNumber:string
 

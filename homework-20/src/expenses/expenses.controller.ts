@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ExpenseService } from "./expenses.service";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
 import { UpdateExpenseDto } from "./dto/update-expense.dto";
@@ -6,6 +6,8 @@ import { UpdateExpenseDto } from "./dto/update-expense.dto";
 // import { ExpenseQueryPipe } from "./pipes/expense-query.pipe";
 import { QueryParamsDto } from "./dto/queryParams.dto";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
+import { isAuthGuard } from "../guards/isAuth.guard";
+import { UserId } from "../decorators/user-id.decorator";
 
 // 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
 //  გამოიყენეთ DTO და class-validator, class-transformer
@@ -24,9 +26,9 @@ export class ExpenseController{
     }
 
     @Post()
-    createExpense(@Body() createExpenseDto: CreateExpenseDto){
-
-        return this.expenseService.createExpense(createExpenseDto);
+    @UseGuards(isAuthGuard)
+    createExpense(@UserId() userId:string,@Body() createExpenseDto: CreateExpenseDto){
+        return this.expenseService.createExpense(userId,createExpenseDto);
     }
     // createExpense(@Body(new CreateExpensePipe()) createExpenseDto:CreateExpenseDto){
     //     return this.expenseService.createExpense(createExpenseDto);
@@ -41,13 +43,15 @@ export class ExpenseController{
     }
 
     @Delete("/:id")
-    deleteExpenseById(@Param() {id}:isValidObjectid){
-        return this.expenseService.deleteExpenseById(id);
+    @UseGuards(isAuthGuard)
+    deleteExpenseById(@UserId() userId:string, @Param() {id}:isValidObjectid){
+        return this.expenseService.deleteExpenseById(userId, id);
     }
 
     @Patch("/:id")
-    updateExpenseById(@Param() {id}:isValidObjectid, @Body() updateExpenseDto:UpdateExpenseDto){
-        return this.expenseService.updateExpenseById(id, updateExpenseDto);
+    @UseGuards(isAuthGuard)
+    updateExpenseById(@UserId() userId:string,  @Param() {id}:isValidObjectid, @Body() updateExpenseDto:UpdateExpenseDto){
+        return this.expenseService.updateExpenseById(userId, id, updateExpenseDto);
     }
 
     // insert many users at once

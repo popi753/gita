@@ -6,6 +6,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { expense } from "./schemas/expense.schema";
 import { UserService } from "../users/users.service";
+import { user } from "../users/schemas/user.schema";
 
 
 @Injectable()
@@ -13,6 +14,7 @@ export class ExpenseService {
 
      constructor(
                 @InjectModel("expense") private expenseModel: Model<expense>,
+                @InjectModel("user") private userModel: Model<user>,
                 @Inject(forwardRef(() =>  UserService)) private userService: UserService,
             ){}
 
@@ -73,16 +75,24 @@ export class ExpenseService {
                 };
     }
 
-    async createExpense(createExpenseDto:CreateExpenseDto){
+    async createExpense(userId:string, createExpenseDto:CreateExpenseDto){
         try {
-            const newExpense = await this.expenseModel.create({...createExpenseDto, totalPrice: createExpenseDto.price * createExpenseDto.quantity});
+            const user = await this.userModel.findById(userId);
+            if (!user) {
+                throw new NotFoundException({user:"user not found"});
+            }
+            const newExpense = await this.expenseModel.create(
+                    {...createExpenseDto, totalPrice: createExpenseDto.price * createExpenseDto.quantity,user: userId});
             if (!newExpense) {
                 throw new InternalServerErrorException({expense : "could not create expense"});        
             }
-
-            const result = await this.userService.addExpenseToUser(createExpenseDto.user, newExpense._id.toString());
-            if (!result.success) {
-                throw new NotFoundException("user not found");
+            
+            const updatedUser = await this.userModel.findByIdAndUpdate(userId,
+            { $push: { expenses: newExpense._id } },
+            { new: true }
+            );
+            if (!updatedUser) {
+                throw new NotFoundException({user:"counld not find user to update expenses"});
             }
 
             return {success:true,newExpense};
@@ -90,6 +100,8 @@ export class ExpenseService {
             throw new InternalServerErrorException(error)
         }
     }
+
+
 
     async getExpenseById(id:string){
         const expense = await this.expenseModel.findById(id).populate({path:'user',select:'-expenses'});
@@ -99,7 +111,13 @@ export class ExpenseService {
         return {success:true,expense};
     }
 
-    async deleteExpenseById(id:string){
+    async deleteExpenseById(userId:string, id:string){
+
+        const result = await this.userService.deleteExpenseFromUser(userId, id);
+        if (!result.success) {
+            throw new NotFoundException("user or expense not found");
+        }
+
         const expense = await this.expenseModel.findByIdAndDelete(id);
         if (!expense) {
             throw new NotFoundException("expense not found");
@@ -107,43 +125,20 @@ export class ExpenseService {
             return {success:true,expense};
     }
 
-    async updateExpenseById(id:string, updateExpenseDto:UpdateExpenseDto){
-        // if (!updateExpenseDto.category && !updateExpenseDto.productName && !updateExpenseDto.price && !updateExpenseDto.quantity) {
-        //     throw new HttpException("please provide valid data", HttpStatus.BAD_REQUEST)
-        // }
-        
-        // const errors : Record <string,string> = {};  
-        
-        // if (updateExpenseDto.category && typeof updateExpenseDto.category !== "string") {
-        //     errors.category = "please provide valid category"
-        // }
-        // if (updateExpenseDto.productName && typeof updateExpenseDto.productName !== "string") {
-        //     errors.productName = "please provide valid product name"
-        // }
-        // if (updateExpenseDto.price && typeof updateExpenseDto.price !== "number") {
-        //     errors.price = "please provide valid price"
-        // }
-        // if (updateExpenseDto.quantity && typeof updateExpenseDto.quantity !== "number") {
-        //     errors.quantity = "please provide valid quantity"
-        // }
-        
-        // if (Object.keys(errors).length) {
-        //     throw new HttpException(errors, HttpStatus.BAD_REQUEST);
-        // }
-        
+    async updateExpenseById(userId:string, id:string, updateExpenseDto:UpdateExpenseDto){
 
-        const existedExpense = await this.expenseModel.findById(id);
-        if (!existedExpense) {
+        
+        const result = await this.userService.updateExpenseOfUser(userId, id, updateExpenseDto);
+        if (!result.success) {
+            throw new NotFoundException("user or expense not found");
+        }
+
+        const expense = await this.expenseModel.findByIdAndUpdate(id, updateExpenseDto, {new:true});
+        if (!expense) {
             throw new NotFoundException("expense not found");
         }
-        let expense = {...existedExpense.toObject(), ...updateExpenseDto};
-        
-        if (updateExpenseDto.price || updateExpenseDto.quantity) {
-            expense.totalPrice = expense.price * expense.quantity;
-        }
-        const updatedExpense = await this.expenseModel.findByIdAndUpdate(id,expense,{new:true});        
-        
-        return {success:true,updatedExpense};
+
+        return {success:true,expense};
     }
 
        //use once, dont repeat

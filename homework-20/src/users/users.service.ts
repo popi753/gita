@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Body, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { QueryParamsDto } from "./dto/queryParams.dto";
@@ -6,17 +6,24 @@ import { isValidObjectId, Model } from "mongoose";
 import { user } from "./schemas/user.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
+import bcrypt from "bcrypt";
+import { SignInDto } from "./dto/sign-in.dto";
+import { JwtService } from "@nestjs/jwt";
+import { UpdateExpenseDto } from "../expenses/dto/update-expense.dto";
 
-// 2) იუზერების შექმნის დროს გადააკეთებთ ლოგიკას რო ყოველი ახალი იუზერის დამატებისას სისტემამ ავტომატურად მიანიჭოს subscriptionStartDate  და subscriptionEndDate, 1 თვე უნდა იყოს ყოველთვის საბსქრიფშენის ვადა.
+// თქვენი დავალებაა წინა 23 დავალებას დაუმატოთ შემდეგი ფუნცქიონალი
 
-// 4) იუზერების კონტროლერს დაამატეთ ახალი ენდფოინთი /upgrade-subscription და აქ თუ დაარექუსთებს იუზერი შეამოწმეთ რამდენად ვალიდური იუზერია და თუ ყველაფერი რიგზეა საბსქრიფშენის subscriptionEndDate გაუხანგრძლივეთ კიდევ ერთი თვით.
+// 1) დაამატეთ რეგისტრაცია/ავტორიზაცია JWT ტოკენის გამოყენებით.
+// 2) დაამატეთ გარდი და დაიცავით სხვადასხვა როუტები რომ რენდომ იუზერებს არ მიცეთ იმის საშუალება რაც რეგისტრირებულ იუზერებს
+// 3) სადაც იუზერების და სხვა რესურსების რეალაცია გაავთ დაამატეთ ლოგიკა რომ იუზერებმა სხვა იუზერების რესურსების წაშლა ან განახლება არ შეძლონ.
 
 
 @Injectable()
 export class UserService {
 
     constructor(
-        @InjectModel("user") private userModel: Model<user>
+        @InjectModel("user") private userModel: Model<user>,
+        private jwtService: JwtService
     ){}
 
     async upgradeSubscription(id:string){
@@ -77,12 +84,16 @@ export class UserService {
             };
     }
 
-    async createUser({firstName,lastName,email,phoneNumber,gender}:CreateUserDto){
+    async createUser({firstName,lastName,email,password,phoneNumber,gender}:CreateUserDto){
         try {
             const existingUser = await this.userModel.findOne({email});
             if (existingUser) {
                 throw new BadRequestException({email:"user with this email already exists"});
+
             }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
 
             const startDate = new Date();
             const endDate = new Date(startDate);
@@ -92,6 +103,7 @@ export class UserService {
                 firstName,
                 lastName,
                 email,
+                password: hashedPassword,
                 phoneNumber,
                 gender,
                 subscriptionStartDate : startDate.toISOString(),
@@ -105,13 +117,36 @@ export class UserService {
         }
     }
 
-    async findOne(id : string){
-        const user = await this.userModel.findById(id).populate({path:'expenses',select:'-user'});
+    async signIn(signInDto:SignInDto){
+        const user = await this.userModel.findOne({email:signInDto.email}).select('+password');
         if (!user) {
             throw new NotFoundException({user:"user not found"});
         }
-        return {success:true,user};
+
+        const isPasswordMatching = await bcrypt.compare(signInDto.password, user.password);
+        if (!isPasswordMatching) {
+            throw new BadRequestException({body:"invalid credentials"});
+        }
+
+        const payload = {userId: user._id};
+
+        const token = await this.jwtService.sign(payload);
+
+        return {success:true,message:"signin successful",token};
     }
+
+    async getProfile(userId:string){
+        try {
+            const user = await this.userModel.findById(userId).populate('expenses');
+            if (!user) {
+                throw new NotFoundException({user:"user not found"});
+            }
+            return {success:true,user};
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+
 
     async deleteUserById(id:string){
         const user = await this.userModel.findByIdAndDelete(id);
@@ -141,18 +176,38 @@ export class UserService {
         }
     }
 
-    async addExpenseToUser(userId:string, expenseId:string){
-        if (!isValidObjectId(userId) || !isValidObjectId(expenseId)) {
-            throw new BadRequestException("invalid userId or expenseId");
+   
+    async deleteExpenseFromUser(userId:string, expenseId:string){
+        const user = await this.userModel.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException({user:"user not found"});
         }
+        if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+            throw new NotFoundException({expense:"expense not found in user's expenses"});
+        }
+
         const updatedUser = await this.userModel.findByIdAndUpdate(userId,
-            { $push: { expenses: expenseId } },
+            { $pull: { expenses: expenseId } },
             { new: true }
         );
         if (!updatedUser) {
             throw new NotFoundException({user:"user not found"});
         }
         return {success:true,updatedUser};
+    }
+
+    async updateExpenseOfUser(userId:string, expenseId:string, updateExpenseDto:UpdateExpenseDto){
+        const user = await this.userModel.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException({user:"user not found"});
+        }
+        if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+            throw new NotFoundException({expense:"expense not found in user's expenses"});
+        }
+
+        return {success:true};
     }
 
     //use once, dont repeat
