@@ -8,6 +8,9 @@ import { QueryParamsDto } from "./dto/queryParams.dto";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
 import { isAuthGuard } from "../guards/isAuth.guard";
 import { UserId } from "../decorators/user-id.decorator";
+import { RoleGuard } from "../guards/role.guard";
+import { Role } from "../users/schemas/user.schema";
+import { GetRole } from "../decorators/role.decorator";
 
 // 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
 //  გამოიყენეთ DTO და class-validator, class-transformer
@@ -44,14 +47,16 @@ export class ExpenseController{
 
     @Delete("/:id")
     @UseGuards(isAuthGuard)
-    deleteExpenseById(@UserId() userId:string, @Param() {id}:isValidObjectid){
-        return this.expenseService.deleteExpenseById(userId, id);
+    @UseGuards(RoleGuard)
+    deleteExpenseById(@UserId() userId:string,@GetRole(Role) role : Role, @Param() {id}:isValidObjectid){
+        return this.expenseService.deleteExpenseById(userId,role, id,);
     }
 
     @Patch("/:id")
     @UseGuards(isAuthGuard)
-    updateExpenseById(@UserId() userId:string,  @Param() {id}:isValidObjectid, @Body() updateExpenseDto:UpdateExpenseDto){
-        return this.expenseService.updateExpenseById(userId, id, updateExpenseDto);
+    @UseGuards(RoleGuard)
+    updateExpenseById(@UserId() userId:string, @GetRole(Role) role : Role,  @Param() {id}:isValidObjectid, @Body() updateExpenseDto:UpdateExpenseDto){
+        return this.expenseService.updateExpenseById(userId,role, id, updateExpenseDto);
     }
 
     // insert many users at once

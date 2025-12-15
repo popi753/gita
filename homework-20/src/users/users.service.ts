@@ -1,15 +1,16 @@
-import { BadRequestException, Body, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Body, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { QueryParamsDto } from "./dto/queryParams.dto";
 import { isValidObjectId, Model } from "mongoose";
-import { user } from "./schemas/user.schema";
+import { Role, user } from "./schemas/user.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
 import bcrypt from "bcrypt";
 import { SignInDto } from "./dto/sign-in.dto";
 import { JwtService } from "@nestjs/jwt";
 import { UpdateExpenseDto } from "../expenses/dto/update-expense.dto";
+import { forbidden } from "joi";
 
 // თქვენი დავალებაა წინა 23 დავალებას დაუმატოთ შემდეგი ფუნცქიონალი
 
@@ -84,80 +85,33 @@ export class UserService {
             };
     }
 
-    async createUser({firstName,lastName,email,password,phoneNumber,gender}:CreateUserDto){
-        try {
-            const existingUser = await this.userModel.findOne({email});
-            if (existingUser) {
-                throw new BadRequestException({email:"user with this email already exists"});
 
-            }
+   
 
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-
-            const startDate = new Date();
-            const endDate = new Date(startDate);
-            endDate.setMonth( startDate.getMonth() + 1);
-
-            const newUser = await this.userModel.create({
-                firstName,
-                lastName,
-                email,
-                password: hashedPassword,
-                phoneNumber,
-                gender,
-                subscriptionStartDate : startDate.toISOString(),
-                subscriptionEndDate : endDate.toISOString()
-            });
-
-            return {success:true,newUser}
-
-        } catch (error) {
-            throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    async deleteUserById(id:string, role:Role, userId:string){
+        let user;
+        if (role === "admin") {
+            user = await this.userModel.findByIdAndDelete(id);
+        }else if (id === userId) {
+            user = await this.userModel.findByIdAndDelete(id);
+        }else{
+            throw new ForbiddenException({error : 'Forbidden'});
         }
-    }
-
-    async signIn(signInDto:SignInDto){
-        const user = await this.userModel.findOne({email:signInDto.email}).select('+password');
-        if (!user) {
-            throw new NotFoundException({user:"user not found"});
-        }
-
-        const isPasswordMatching = await bcrypt.compare(signInDto.password, user.password);
-        if (!isPasswordMatching) {
-            throw new BadRequestException({body:"invalid credentials"});
-        }
-
-        const payload = {userId: user._id};
-
-        const token = await this.jwtService.sign(payload);
-
-        return {success:true,message:"signin successful",token};
-    }
-
-    async getProfile(userId:string){
-        try {
-            const user = await this.userModel.findById(userId).populate('expenses');
-            if (!user) {
-                throw new NotFoundException({user:"user not found"});
-            }
-            return {success:true,user};
-        } catch (error) {
-            throw new InternalServerErrorException(error);
-        }
-    }
-
-
-    async deleteUserById(id:string){
-        const user = await this.userModel.findByIdAndDelete(id);
         if (!user) {
             throw new NotFoundException({user:"user not found"});
         }
         return {success:true,user};
     }
 
-    async updateUserById(id:string, updateUserDto:UpdateUserDto){
-        const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true});
+    async updateUserById(id:string, role:Role, updateUserDto:UpdateUserDto, userId:string){
+        let updatedUser;
+        if (role === "admin") {
+            updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true});
+        }else if (id === userId) {
+            updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true});
+        }else{
+            throw new ForbiddenException({error : 'Forbidden'});
+        }
         if (!updatedUser) {
             throw new NotFoundException({user:"user not found"});
         }
@@ -177,38 +131,38 @@ export class UserService {
     }
 
    
-    async deleteExpenseFromUser(userId:string, expenseId:string){
-        const user = await this.userModel.findById(userId);
+    // async deleteExpenseFromUser(userId:string,role:Role, expenseId:string){
+    //     const user = await this.userModel.findById(userId);
 
-        if (!user) {
-            throw new NotFoundException({user:"user not found"});
-        }
-        if (!user.expenses.some(expense => expense.toString() === expenseId)) {
-            throw new NotFoundException({expense:"expense not found in user's expenses"});
-        }
+    //     if (!user) {
+    //         throw new NotFoundException({user:"user not found"});
+    //     }
+    //     if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+    //         throw new NotFoundException({expense:"expense not found in user's expenses"});
+    //     }
 
-        const updatedUser = await this.userModel.findByIdAndUpdate(userId,
-            { $pull: { expenses: expenseId } },
-            { new: true }
-        );
-        if (!updatedUser) {
-            throw new NotFoundException({user:"user not found"});
-        }
-        return {success:true,updatedUser};
-    }
+    //     const updatedUser = await this.userModel.findByIdAndUpdate(userId,
+    //         { $pull: { expenses: expenseId } },
+    //         { new: true }
+    //     );
+    //     if (!updatedUser) {
+    //         throw new NotFoundException({user:"user not found"});
+    //     }
+    //     return {success:true,updatedUser};
+    // }
 
-    async updateExpenseOfUser(userId:string, expenseId:string, updateExpenseDto:UpdateExpenseDto){
-        const user = await this.userModel.findById(userId);
+    // async updateExpenseOfUser(userId:string, role:Role, expenseId:string, updateExpenseDto:UpdateExpenseDto){
+    //     const user = await this.userModel.findById(userId);
 
-        if (!user) {
-            throw new NotFoundException({user:"user not found"});
-        }
-        if (!user.expenses.some(expense => expense.toString() === expenseId)) {
-            throw new NotFoundException({expense:"expense not found in user's expenses"});
-        }
+    //     if (!user) {
+    //         throw new NotFoundException({user:"user not found"});
+    //     }
+    //     if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+    //         throw new NotFoundException({expense:"expense not found in user's expenses"});
+    //     }
 
-        return {success:true};
-    }
+    //     return {success:true};
+    // }
 
     //use once, dont repeat
     // async insertDataToMongoDB(){

@@ -6,6 +6,11 @@ export enum Gender {
     Female = "female",
 }
 
+export enum Role {
+    User = "user",
+    Admin = "admin",
+}
+
 @Schema()
 export class user {
     @Prop({
@@ -47,6 +52,13 @@ export class user {
         enum: Gender,
     })
     gender: Gender
+
+    @Prop({
+        required: true,
+        type: String,
+        enum: Role,
+    })
+    role: Role
 
     @Prop({
         required: true,

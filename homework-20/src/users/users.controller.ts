@@ -5,16 +5,19 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { QueryParamsDto } from "./dto/queryParams.dto";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
 import { SignInDto } from "./dto/sign-in.dto";
-import { get } from "https";
 import { isAuthGuard } from "../guards/isAuth.guard";
 import { UserId } from "../decorators/user-id.decorator";
+import { Role } from "./schemas/user.schema";
+import { RoleGuard } from "../guards/role.guard";
+import { GetRole } from "../decorators/role.decorator";
 
-// თქვენი დავალებაა წინა 23 დავალებას დაუმატოთ შემდეგი ფუნცქიონალი
+// თქვენი დავალებაა წინა 24 დავალებას დაუმატოთ შემდეგი ფუნქციონალი: 
 
-// 1) დაამატეთ რეგისტრაცია/ავტორიზაცია JWT ტოკენის გამოყენებით.
-// 2) დაამატეთ გარდი და დაიცავით სხვადასხვა როუტები რომ რენდომ იუზერებს არ მიცეთ იმის საშუალება რაც რეგისტრირებულ იუზერებს
-// 3) სადაც იუზერების და სხვა რესურსების რეალაცია გაავთ დაამატეთ ლოგიკა რომ იუზერებმა სხვა იუზერების რესურსების წაშლა ან განახლება არ შეძლონ.
-
+// 1) შემოიტანეთ სისტემაში როლები და უფლებები
+// 2) გექნებათ 2 ძირითადი როლი  user და admin
+// 3) ადმნის შეუძლია ყველაფერი, სხვა იუზერების წაშლა, სხვისი ხარჯების წაშლა დაედითება, პროდუქტების წაშლა დაედითება და ა.შ.
+// 4) გააკეთეთ როლის გარდი და როლის დეკორატორი
+// 5) როცა იუზერი დალოგინდება ტოკენში ჩასეტეთ როლი
 
 @Controller("/users")
 export class UsersController{
@@ -31,32 +34,19 @@ export class UsersController{
         return this.userService.findAll(query);
     }
 
-    @Post()
-    createUser(@Body() createUserDto:CreateUserDto){
-        return this.userService.createUser(createUserDto);
-    }
 
-    @Post("/signin")
-    signin(@Body() signInDto:SignInDto){
-        return this.userService.signIn(signInDto);
-    }
-
-    @Get("/profile")
+    @Delete("/:userId")
     @UseGuards(isAuthGuard)
-    getProfile(@UserId() id:string) {
-        return this.userService.getProfile(id);
+    @UseGuards(RoleGuard)
+    deleteUserById(@UserId() id:string, @GetRole(Role) role:Role, @Param("userId") userId:string){
+        return this.userService.deleteUserById(id, role,userId);
     }
 
-    @Delete()
+    @Patch("/:userId")
     @UseGuards(isAuthGuard)
-    deleteUserById(@UserId() id:string){
-        return this.userService.deleteUserById(id);
-    }
-
-    @Patch()
-    @UseGuards(isAuthGuard)
-    updateUserById(@UserId() id:string, @Body() updateUserDto:UpdateUserDto){
-        return this.userService.updateUserById(id, updateUserDto);
+    @UseGuards(RoleGuard)
+    updateUserById(@UserId() id:string,@GetRole(Role) role:Role, @Body() updateUserDto:UpdateUserDto, @Param("userId") userId:string){
+        return this.userService.updateUserById(id, role, updateUserDto,userId);
     }
 
     // insert many users at once

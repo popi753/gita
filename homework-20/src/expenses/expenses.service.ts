@@ -6,7 +6,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { expense } from "./schemas/expense.schema";
 import { UserService } from "../users/users.service";
-import { user } from "../users/schemas/user.schema";
+import { Role, user } from "../users/schemas/user.schema";
+import { Types } from 'mongoose';
+
 
 
 @Injectable()
@@ -101,8 +103,6 @@ export class ExpenseService {
         }
     }
 
-
-
     async getExpenseById(id:string){
         const expense = await this.expenseModel.findById(id).populate({path:'user',select:'-expenses'});
         if (!expense) {
@@ -111,34 +111,69 @@ export class ExpenseService {
         return {success:true,expense};
     }
 
-    async deleteExpenseById(userId:string, id:string){
+    async deleteExpenseById(userId:string,role:Role, expenseId:string){
 
-        const result = await this.userService.deleteExpenseFromUser(userId, id);
-        if (!result.success) {
-            throw new NotFoundException("user or expense not found");
+        if (role === Role.Admin) {
+            console.log("Admin deleting expense");
+            const expense = await this.expenseModel.findById(expenseId);
+            if (!expense) throw new NotFoundException({expense:"expense not found"});            
+
+            const user = await this.userModel.findById(expense.user);
+            if (!user) throw new NotFoundException({user:"expense owner not found"});
+
+            const updatedUser = await this.userModel.findByIdAndUpdate(user._id,
+                { $pull: { expenses: new Types.ObjectId(expenseId) }  },
+                { new: true }
+            );
+            if (!updatedUser) {
+                throw new NotFoundException({user:"expense wasnt deleted from user"});
+            }
+        }else{
+            console.log("non Admin deleting expense");
+            const user = await this.userModel.findById(userId);
+
+            if (!user) {
+                throw new NotFoundException({user:"expense owner not found"});
+            }
+            if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+                throw new NotFoundException({expense:"expense not found in user's expenses"});
+            }
+
+            const updatedUser = await this.userModel.findByIdAndUpdate(userId,
+                { $pull: { expenses: expenseId } },
+                { new: true }
+            );
+            if (!updatedUser) {
+                throw new NotFoundException({user:"expense owner not found"});
+            }
         }
 
-        const expense = await this.expenseModel.findByIdAndDelete(id);
+        const expense = await this.expenseModel.findByIdAndDelete(expenseId);
         if (!expense) {
             throw new NotFoundException("expense not found");
         }
             return {success:true,expense};
     }
 
-    async updateExpenseById(userId:string, id:string, updateExpenseDto:UpdateExpenseDto){
+    async updateExpenseById(userId:string, role:Role, expenseId:string, updateExpenseDto:UpdateExpenseDto){
 
-        
-        const result = await this.userService.updateExpenseOfUser(userId, id, updateExpenseDto);
-        if (!result.success) {
-            throw new NotFoundException("user or expense not found");
+        if (role !== Role.Admin) {
+            const user = await this.userModel.findById(userId);
+            if (!user) {
+                throw new NotFoundException({user:"expense owner not found"});
+            }
+            if (!user.expenses.some(expense => expense.toString() === expenseId)) {
+                throw new NotFoundException({expense:"expense not found in user's expenses"});
+            }
+
         }
 
-        const expense = await this.expenseModel.findByIdAndUpdate(id, updateExpenseDto, {new:true});
-        if (!expense) {
+        const updatedExpense = await this.expenseModel.findByIdAndUpdate(expenseId, updateExpenseDto, {new:true});
+        if (!updatedExpense) {
             throw new NotFoundException("expense not found");
         }
-
-        return {success:true,expense};
+        return {success:true,expense:updatedExpense};
+        
     }
 
        //use once, dont repeat

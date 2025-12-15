@@ -1,12 +1,9 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './users/users.module';
-import { ExpensesModule } from './expenses/expenses.module';
-import { ProductsModule } from './products/products.module';
-import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './auth/auth.module';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { isAuthGuard } from '../guards/isAuth.guard';
+import { SignInDto } from '../users/dto/sign-in.dto';
+import { UserId } from '../decorators/user-id.decorator';
 
 // თქვენი დავალებაა წინა 24 დავალებას დაუმატოთ შემდეგი ფუნქციონალი: 
 
@@ -16,14 +13,25 @@ import { AuthModule } from './auth/auth.module';
 // 4) გააკეთეთ როლის გარდი და როლის დეკორატორი
 // 5) როცა იუზერი დალოგინდება ტოკენში ჩასეტეთ როლი
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    MongooseModule.forRoot(process.env.DB_URL!),
-    UserModule, ExpensesModule, ProductsModule, AuthModule],
-  controllers: [AppController],
-  providers: [AppService],
-})
-export class AppModule {}
+@Controller('/auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+
+  @Post("/signup")
+  signUp(@Body() createUserDto:CreateUserDto){
+      return this.authService.signUp(createUserDto);
+  }
+  
+  @Post("/signin")
+  signIn(@Body() signInDto:SignInDto){
+      return this.authService.signIn(signInDto);
+  }
+
+  @Get("/profile")
+  @UseGuards(isAuthGuard)
+  getProfile(@UserId() id:string) {
+    console.log("Getting profile for user ID:", id);
+      return this.authService.getProfile(id);
+  }
+}
