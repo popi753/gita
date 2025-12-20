@@ -41,6 +41,12 @@ export class user {
 
     @Prop({
         required: true,
+        type: Number,
+    })
+    age:number
+
+    @Prop({
+        required: true,
         type: String,
         unique: true,
     })
@@ -59,6 +65,12 @@ export class user {
         enum: Role,
     })
     role: Role
+
+    @Prop({
+        required: true,
+        type: Boolean,
+    })
+    isActive: Boolean
 
     @Prop({
         required: true,

@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { user } from '../users/schemas/user.schema';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import bcrypt from "bcrypt";
-import { SignInDto } from '../users/dto/sign-in.dto';
+import { SignInDto } from './dto/sign-in.dto';
 import { Role } from '../users/schemas/user.schema';
 
 

@@ -9,6 +9,15 @@ import { UserService } from "../users/users.service";
 import { Role, user } from "../users/schemas/user.schema";
 import { Types } from 'mongoose';
 
+// მოგესალმებით თქვენი დავალებაა დაამატოთ შემდეგი ფიჩერები წინა ანუ 27 დავალებას.
+
+// 1) დაუმატეთ იუზერებს ახალი ფროფერტი isActive, და დაწერეთ მიგრაცია რომელიც ყველა იუზერის ჩანაწერს დაუმატებს ამ ახალ ფროფერთის შეიძლება ეს იყოს true ან false
+
+// 2) დაამატეთ ახალი ენდფოინთი იქსფენსებზე მაგალითად /statistic და დააბრნეთ კატეგორიის მიხედვით დაჯგუფებული ხარჯები, პლუს დათვალეთ იმ კატეგორიაში რამდენი იყო სრული ხარჯი, რამდენი აითემია თითოეულ ხარჯის კატეგორიაში, და ლექციაზე როგორც ვქენით მასივის სახით ჩანდეს ეს ხარჯები.
+
+// 3) დაამატეთ ახალი ენფოინთი იუზერებზე, დააჯგუფეთ ყველა იუზერი სქესის მიხედვით და გამოთვალეთ საშუალო ასაკი ორივეში.
+
+// 4) ხარჯებზე დაამატეთ ახალი ენდფოინთი /expenses/top-spenders?limit=10 სადაც იუზერებს დააჯგუფებთ userId ების მიხედვით და დაუთვლით მთლიანად რამდენი აქვს დახარჯული.
 
 
 @Injectable()
@@ -20,15 +29,6 @@ export class ExpenseService {
                 @Inject(forwardRef(() =>  UserService)) private userService: UserService,
             ){}
 
-    
-
-    // 2) დაამატეთ ორივე რესურსზე ფეჯინეიშენი, page = 1, take.= 30,
-//  არაფერს თუ არ გადასცემთ დიფოლატად პირველი 30 ჩანაწერი უნდა წამოიღოს
-// 3) ხარჯებზე გააკეთეთ კატეგორიების ვალიდაცია, გქონდეთ რამე knowCategories 
-// და როგორც ლექციაზე ვქენით ან დასერჩეთ როგორ უნდა გააეკთოთ ინამ ველიუების ვალიდაცია class-validator ის გამოყენებით
-
-
-// 5) დაამატეთ query-ით ფილტრები ასევე ხარჯებზე, კატეგორით მაგალითად, priceFrom. priceTo
 
 
     async findAll({page,take,priceFrom,priceTo,category}:QueryParamsDto){
@@ -75,6 +75,54 @@ export class ExpenseService {
                 } catch (error) {
                     throw new InternalServerErrorException(error);
                 };
+    }
+
+    async getTopSpenders(limit : number = 10){
+        const topSpenders = await this.userModel.aggregate([
+            {
+                $unwind: "$expenses"
+            },
+            {
+                $lookup: {
+                    from: "expenses",
+                    localField: "expenses",
+                    foreignField: "_id",
+                    as: "expenseDetails"
+                }
+            },
+            {
+                $unwind: "$expenseDetails"
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    firstName: { $first: "$firstName" },
+                    lastName: { $first: "$lastName" },
+                    totalSpent: { $sum: "$expenseDetails.totalPrice" }
+                }
+            },
+            { $sort: { totalSpent: -1 } },
+            {
+                $limit: limit
+            }
+    ]);
+
+        return topSpenders;
+    }
+
+    async getStatistics(){
+        const expenses = await this.expenseModel.aggregate([
+            {
+                $group: {
+                    _id: "$category",
+                    totalExpense: { $sum: "$totalPrice" },
+                    count: { $sum: 1 },
+                    expenses: { $push: { productName: "$productName", price: "$totalPrice" } }
+                }
+            }
+        ]);
+
+        return expenses;
     }
 
     async createExpense(userId:string, createExpenseDto:CreateExpenseDto){

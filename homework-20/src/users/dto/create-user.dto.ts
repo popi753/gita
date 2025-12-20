@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer"
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator"
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator"
 import { Gender } from "../schemas/user.schema"
 
 
@@ -20,6 +20,10 @@ export class CreateUserDto {
     @IsNotEmpty()
     @IsString()
     password:string
+
+    @IsNotEmpty()
+    @IsNumber()
+    age:number
 
     @IsNotEmpty()
     @IsString()

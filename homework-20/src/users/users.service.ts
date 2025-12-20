@@ -7,17 +7,20 @@ import { Role, user } from "./schemas/user.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { isValidObjectid } from "../common/is-valid-objectId.dto";
 import bcrypt from "bcrypt";
-import { SignInDto } from "./dto/sign-in.dto";
+import { SignInDto } from "../auth/dto/sign-in.dto";
 import { JwtService } from "@nestjs/jwt";
 import { UpdateExpenseDto } from "../expenses/dto/update-expense.dto";
 import { forbidden } from "joi";
 
-// თქვენი დავალებაა წინა 23 დავალებას დაუმატოთ შემდეგი ფუნცქიონალი
+// მოგესალმებით თქვენი დავალებაა დაამატოთ შემდეგი ფიჩერები წინა ანუ 27 დავალებას.
 
-// 1) დაამატეთ რეგისტრაცია/ავტორიზაცია JWT ტოკენის გამოყენებით.
-// 2) დაამატეთ გარდი და დაიცავით სხვადასხვა როუტები რომ რენდომ იუზერებს არ მიცეთ იმის საშუალება რაც რეგისტრირებულ იუზერებს
-// 3) სადაც იუზერების და სხვა რესურსების რეალაცია გაავთ დაამატეთ ლოგიკა რომ იუზერებმა სხვა იუზერების რესურსების წაშლა ან განახლება არ შეძლონ.
+// 1) დაუმატეთ იუზერებს ახალი ფროფერტი isActive, და დაწერეთ მიგრაცია რომელიც ყველა იუზერის ჩანაწერს დაუმატებს ამ ახალ ფროფერთის შეიძლება ეს იყოს true ან false
 
+// 2) დაამატეთ ახალი ენდფოინთი იქსფენსებზე მაგალითად /statistic და დააბრნეთ კატეგორიის მიხედვით დაჯგუფებული ხარჯები, პლუს დათვალეთ იმ კატეგორიაში რამდენი იყო სრული ხარჯი, რამდენი აითემია თითოეულ ხარჯის კატეგორიაში, და ლექციაზე როგორც ვქენით მასივის სახით ჩანდეს ეს ხარჯები.
+
+// 3) დაამატეთ ახალი ენფოინთი იუზერებზე, დააჯგუფეთ ყველა იუზერი სქესის მიხედვით და გამოთვალეთ საშუალო ასაკი ორივეში.
+
+// 4) ხარჯებზე დაამატეთ ახალი ენდფოინთი /expenses/top-spenders?limit=10 სადაც იუზერებს დააჯგუფებთ userId ების მიხედვით და დაუთვლით მთლიანად რამდენი აქვს დახარჯული.
 
 @Injectable()
 export class UserService {
@@ -26,6 +29,20 @@ export class UserService {
         @InjectModel("user") private userModel: Model<user>,
         private jwtService: JwtService
     ){}
+
+    
+//     async onModuleInit(){
+//         // 20% of true 80% of false
+//         await this.userModel.updateMany(
+//             { isActive: { $exists: false } },
+//             [{ 
+//                 $set: { 
+//                     isActive: { $lt: [{ $rand: {} }, 0.2] } 
+//                 } 
+//             }]
+// );
+//         console.log("Module initialized: Missing active status populated.");
+//     }
 
     async upgradeSubscription(id:string){
         const user = await this.userModel.findById(id);
@@ -85,8 +102,19 @@ export class UserService {
             };
     }
 
-
-   
+    async groupUsersBySex(){
+        const usersBySex = await this.userModel.aggregate([
+            {
+                $group: {
+                    _id: "$gender",
+                    count: { $sum: 1 },
+                    averageAge: { $avg: "$age" },
+                }
+            }
+        ]);
+        return usersBySex;
+    }
+  
 
     async deleteUserById(id:string, role:Role, userId:string){
         let user;

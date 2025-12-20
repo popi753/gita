@@ -12,11 +12,15 @@ import { RoleGuard } from "../guards/role.guard";
 import { Role } from "../users/schemas/user.schema";
 import { GetRole } from "../decorators/role.decorator";
 
-// 1) დაამატეთ ვალიდაციები იუზერებსაც და ხარჯებსაც(იქსდენსებს),
-//  გამოიყენეთ DTO და class-validator, class-transformer
+// მოგესალმებით თქვენი დავალებაა დაამატოთ შემდეგი ფიჩერები წინა ანუ 27 დავალებას.
 
+// 1) დაუმატეთ იუზერებს ახალი ფროფერტი isActive, და დაწერეთ მიგრაცია რომელიც ყველა იუზერის ჩანაწერს დაუმატებს ამ ახალ ფროფერთის შეიძლება ეს იყოს true ან false
 
-// 5) დაამატეთ query-ით ფილტრები ასევე ხარჯებზე, კატეგორით მაგალითად, priceFrom. priceTo
+// 2) დაამატეთ ახალი ენდფოინთი იქსფენსებზე მაგალითად /statistic და დააბრნეთ კატეგორიის მიხედვით დაჯგუფებული ხარჯები, პლუს დათვალეთ იმ კატეგორიაში რამდენი იყო სრული ხარჯი, რამდენი აითემია თითოეულ ხარჯის კატეგორიაში, და ლექციაზე როგორც ვქენით მასივის სახით ჩანდეს ეს ხარჯები.
+
+// 3) დაამატეთ ახალი ენფოინთი იუზერებზე, დააჯგუფეთ ყველა იუზერი სქესის მიხედვით და გამოთვალეთ საშუალო ასაკი ორივეში.
+
+// 4) ხარჯებზე დაამატეთ ახალი ენდფოინთი /expenses/top-spenders?limit=10 სადაც იუზერებს დააჯგუფებთ userId ების მიხედვით და დაუთვლით მთლიანად რამდენი აქვს დახარჯული.
 
 @Controller("/expenses")
 export class ExpenseController{
@@ -26,6 +30,16 @@ export class ExpenseController{
     findAll(@Query() query:QueryParamsDto){
     // findAll(@Query(new ExpenseQueryPipe()) query){
             return this.expenseService.findAll(query);
+    }
+
+    @Get("/top-spenders")
+    getTopSpenders(@Query("limit", new ParseIntPipe({ optional: true })) limit: number = 10){
+        return this.expenseService.getTopSpenders(limit);
+    }
+
+    @Get("/statistics")
+    getStatistics(){
+        return this.expenseService.getStatistics();
     }
 
     @Post()
@@ -49,7 +63,7 @@ export class ExpenseController{
     @UseGuards(isAuthGuard)
     @UseGuards(RoleGuard)
     deleteExpenseById(@UserId() userId:string,@GetRole(Role) role : Role, @Param() {id}:isValidObjectid){
-        return this.expenseService.deleteExpenseById(userId,role, id,);
+        return this.expenseService.deleteExpenseById(userId,role, id);
     }
 
     @Patch("/:id")

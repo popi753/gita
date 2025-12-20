@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { isAuthGuard } from '../guards/isAuth.guard';
-import { SignInDto } from '../users/dto/sign-in.dto';
+import { SignInDto } from './dto/sign-in.dto';
 import { UserId } from '../decorators/user-id.decorator';
 
 // თქვენი დავალებაა წინა 24 დავალებას დაუმატოთ შემდეგი ფუნქციონალი: 
