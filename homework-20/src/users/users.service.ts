@@ -44,10 +44,12 @@ export class UserService {
 //         console.log("Module initialized: Missing active status populated.");
 //     }
 
+
+
     async upgradeSubscription(id:string){
         const user = await this.userModel.findById(id);
         if (!user) {
-            throw new NotFoundException("user not found");
+            throw new NotFoundException({user:"user not found"});
         }
         const endDate = new Date(user.subscriptionEndDate);
         if (new Date() > endDate) {
